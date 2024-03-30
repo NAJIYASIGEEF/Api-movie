@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from api.models import Movie
 from api.serializers import MovieSerializer
 from rest_framework import status
+from rest_framework.viewsets import ViewSet
+from rest_framework.decorators import action
 
 #localhost:8000/helloworld/
 # method:get()
@@ -153,3 +155,69 @@ class MovieRetriveUpdateDestroyView(APIView):
             return Response(data=serializer_instance.data,status=status.HTTP_200_OK)
         else:
             return Response(data=serializer_instance.errors,status=status.HTTP_400_BAD_REQUEST)
+        
+
+#Using ViewSet
+class MovieViewSetView(ViewSet):
+
+
+    def list(self,request,*args,**kwargs):
+
+        qs=Movie.objects.all()
+        serializer_instance=MovieSerializer(qs,many=True)   
+        return Response(data=serializer_instance.data,status=status.HTTP_200_OK)
+    
+
+    def create(self,request,*args,**kwargs):
+
+        data=request.data
+        serializer_instance=MovieSerializer(data=data)  
+        if serializer_instance.is_valid():
+            serializer_instance.save()
+            return Response(data=serializer_instance.data,status=status.HTTP_201_CREATED)
+        return Response(data=serializer_instance.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+    def retrieve(self,request,*args,**kwargs):
+
+        id=kwargs.get("pk")
+        qs=Movie.objects.get(id=id)
+        serializer_instance=MovieSerializer(qs)
+        return Response(data=serializer_instance.data,status=status.HTTP_200_OK)
+        
+
+    def update(self,request,*args,**kwargs):
+
+        id=kwargs.get("pk")
+        data=request.data
+        movie_object=Movie.objects.get(id=id)
+        serializer_instance=MovieSerializer(data=data,instance=movie_object)
+        if serializer_instance.is_valid():
+            serializer_instance.save()
+            return Response(data=serializer_instance.data,status=status.HTTP_200_OK)
+        else:
+            return Response(data=serializer_instance.errors,status=status.HTTP_400_BAD_REQUEST)
+        
+
+    def destroy(self,request,*args,**kwargs):
+
+        id=kwargs.get("pk")
+        Movie.objects.get(id=id).delete()
+        return Response(data={"message":"deleted"},status=status.HTTP_200_OK)
+    
+    @action(methods=["get"],detail=False)
+    def genres(self,request,*args,**kwargs):
+        qs=Movie.objects.values_list("genre",flat=True).distinct()
+        return Response(data=qs)
+        
+# localhost:8000/api/movies/genres/
+# method:get
+    
+# class GenreListView(APIView):
+
+#     def get(self,request,*args,**kwargs):
+#         qs=Movie.objects.values_list("genre",flat=True).distinct()
+#         return Response(data=qs)
+    
+# localhost:8000/api/movies/languages/
+# method:get
+    

@@ -17,6 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from api import views
+from rest_framework.routers import DefaultRouter
+
+router=DefaultRouter()
+router.register("api/v1/movies",views.MovieViewSetView,basename="movies")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,8 +32,8 @@ urlpatterns = [
     path("api/albums/",views.AlbumListView.as_view()),
     path("api/movies/",views.MovieListCreateView.as_view()),
     path("api/movies/<int:pk>/",views.MovieRetriveUpdateDestroyView.as_view()),
+    # path("api/genres/",views.GenreListView.as_view()),
 
 
 
-
-]
+]+router.urls
