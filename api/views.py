@@ -164,6 +164,19 @@ class MovieViewSetView(ViewSet):
     def list(self,request,*args,**kwargs):
 
         qs=Movie.objects.all()
+        # print(request.query_params)
+
+        # localhost:8000/api/v1/movies?language={value}
+        if "language" in request.query_params:
+            value=request.query_params.get("language")
+            qs=qs.filter(language=value)
+
+        # localhost:8000/api/v1/movies?genre={value}
+        if "genre" in request.query_params:
+            value=request.query_params.get("genre")
+            qs=qs.filter(genre=value)
+
+
         serializer_instance=MovieSerializer(qs,many=True)   
         return Response(data=serializer_instance.data,status=status.HTTP_200_OK)
     
@@ -208,6 +221,11 @@ class MovieViewSetView(ViewSet):
     def genres(self,request,*args,**kwargs):
         qs=Movie.objects.values_list("genre",flat=True).distinct()
         return Response(data=qs)
+    
+    @action(methods=["get"],detail=False)
+    def languages(self,request,*args,**kwargs):
+        qs=Movie.objects.values_list("language",flat=True).distinct()
+        return Response(data=qs)
         
 # localhost:8000/api/movies/genres/
 # method:get
@@ -221,3 +239,9 @@ class MovieViewSetView(ViewSet):
 # localhost:8000/api/movies/languages/
 # method:get
     
+
+# localhost:8000/products?category=electronics/
+# method:get (list,get)
+    
+# localhost:8000/api/v1/movies?genre=action/
+# method:get   
